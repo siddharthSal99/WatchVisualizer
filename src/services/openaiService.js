@@ -4,13 +4,15 @@ const PART_LABELS = {
   bezel: 'bezel',
   bezelInsert: 'bezel insert',
   case: 'case',
+  crown: 'crown',
   dial: 'dial',
   strap: 'strap',
   hands: 'hands',
+  gmtHand: 'GMT hand',
   chapterRing: 'chapter ring',
 }
 
-export async function generateWatchImage(partImages, colorCustomizations) {
+export async function generateWatchImage(partImages, colorCustomizations, partDimensions = {}) {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY
   
   if (!apiKey) {
@@ -26,6 +28,29 @@ export async function generateWatchImage(partImages, colorCustomizations) {
   const uploadedParts = Object.keys(partImages)
   const partList = uploadedParts.map(partId => PART_LABELS[partId]).join(', ')
 
+  // Build dimension instructions text
+  const DIMENSION_LABELS = {
+    outerDiameter: 'outer diameter',
+    lugWidth: 'lug width',
+    strapWidth: 'strap width',
+    diameter: 'diameter',
+    length: 'length',
+  }
+
+  const dimensionInstructions = Object.entries(partDimensions)
+    .filter(([partId]) => uploadedParts.includes(partId))
+    .map(([partId, dims]) => {
+      const partName = PART_LABELS[partId]
+      const measurements = Object.entries(dims)
+        .filter(([, val]) => val !== '' && val != null)
+        .map(([dimKey, val]) => `${DIMENSION_LABELS[dimKey] || dimKey} of ${val} mm`)
+        .join(' and ')
+      if (!measurements) return null
+      return `The ${partName} has a ${measurements}.`
+    })
+    .filter(Boolean)
+    .join(' ')
+
   // Build color customization text
   const colorInstructions = Object.entries(colorCustomizations)
     .map(([partId, color]) => {
@@ -34,11 +59,21 @@ export async function generateWatchImage(partImages, colorCustomizations) {
     })
     .join(' ')
 
-  // Build the simple prompt exactly as the user specified (matching ChatGPT web interface)
-  let prompt = `Here is an image of a watch ${partList}. Please show me an image of what the watch constructed of these parts would look like. Please pay attention to the colors and shapes of the various parts.`
+  // Build a detailed prompt that emphasizes faithful reproduction of shapes and details
+  let prompt = `Here are images of individual watch parts: ${partList}. Generate a photorealistic image of the fully assembled wristwatch using exactly these parts. It is critical that you faithfully reproduce the exact shape, silhouette, proportions, colors, and fine details of every single part as shown in the reference images. Do not substitute generic or default shapes for any part.
+
+Specific instructions:
+- HANDS: Reproduce the exact hand style and silhouette from the image (e.g. cathedral, dauphine, snowflake, sword, pencil, skeleton, etc.). Match the hand width, length ratio, lume plots, and tip shape precisely. Do not use generic stick hands unless that is what is shown.
+- DIAL: Reproduce all dial features exactly — hour indices/markers (applied, printed, or lumed), minute track, any text or logos, subdials, date windows, patterns, textures (sunburst, fumé, guilloche, etc.), and artwork. Match the layout and positioning faithfully.
+- BEZEL INSERT: Reproduce all bezel insert markings, numerals, minute/hour scales, color gradients (e.g. Pepsi, Batman, Root Beer), the pip/lume dot at 12, and the exact font style of any numbers.
+- CASE, CROWN, CHAPTER RING, STRAP/BRACELET, GMT HAND: Match the exact shape, finish (brushed, polished, matte), proportions, and design details from each reference image.`
   
   if (colorInstructions) {
-    prompt += ` ${colorInstructions}`
+    prompt += `\n\nColor/style overrides: ${colorInstructions}`
+  }
+
+  if (dimensionInstructions) {
+    prompt += `\n\nProportional dimensions (use these to size the parts relative to each other): ${dimensionInstructions}`
   }
 
   // Helper function to convert data URL to File object
@@ -124,11 +159,18 @@ export async function generateWatchImage(partImages, colorCustomizations) {
       // Fall through to chat completions approach
     }
 
-    // Fallback: Use GPT-4 Vision with the simple prompt and images
+    // Fallback: Use GPT-4 Vision with the prompt and images
     // The images are passed directly to the vision model so it can see them
     // Ask GPT-4 Vision to describe what the assembled watch would look like
-    // This mimics ChatGPT's behavior where it analyzes the images and generates a description
-    const visionPrompt = `${prompt} Please provide a detailed description of what this assembled watch would look like, being very specific about the colors, shapes, textures, and designs you see in each part.`
+    const visionPrompt = `${prompt}
+
+Additionally, please provide an extremely detailed description of what this assembled watch would look like. For each part, describe:
+- The exact shape and silhouette (e.g. for hands: cathedral, snowflake, dauphine, sword, etc.)
+- All markings, indices, numerals, text, logos, and their precise positioning
+- Colors, gradients, and finishes (brushed, polished, matte, sunburst, fumé, etc.)
+- Textures, patterns, and any artwork on the dial
+- Proportions and how the parts relate to each other in size
+Be as specific as possible so the description alone could recreate the watch faithfully.`
     
     const visionResponse = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -164,7 +206,15 @@ export async function generateWatchImage(partImages, colorCustomizations) {
     // Fallback to gpt-4-vision-preview if gpt-4o is not available
     if (error.message?.includes('gpt-4o') || error.code === 'model_not_found') {
       try {
-        const visionPrompt = `${prompt} Please provide a detailed description of what this assembled watch would look like, being very specific about the colors, shapes, textures, and designs you see in each part.`
+        const visionPrompt = `${prompt}
+
+Additionally, please provide an extremely detailed description of what this assembled watch would look like. For each part, describe:
+- The exact shape and silhouette (e.g. for hands: cathedral, snowflake, dauphine, sword, etc.)
+- All markings, indices, numerals, text, logos, and their precise positioning
+- Colors, gradients, and finishes (brushed, polished, matte, sunburst, fumé, etc.)
+- Textures, patterns, and any artwork on the dial
+- Proportions and how the parts relate to each other in size
+Be as specific as possible so the description alone could recreate the watch faithfully.`
         
         const visionResponse = await openai.chat.completions.create({
           model: "gpt-4-vision-preview",
@@ -197,6 +247,75 @@ export async function generateWatchImage(partImages, colorCustomizations) {
       }
     }
     throw new Error(error.message || 'Failed to generate image')
+  }
+}
+
+// Function to extract/isolate a specific watch part from a full watch image
+export async function extractPartFromWatch(imageDataUrl, partId) {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+  
+  if (!apiKey) {
+    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.')
+  }
+
+  const openai = new OpenAI({
+    apiKey: apiKey,
+    dangerouslyAllowBrowser: true
+  })
+
+  const partName = PART_LABELS[partId] || partId
+
+  const prompt = `This image shows a complete wristwatch. Please extract and isolate ONLY the ${partName} from this watch. Show the isolated ${partName} by itself on a clean, plain white background. Remove all other parts of the watch — only the ${partName} should remain. Preserve the exact shape, colors, textures, markings, and all fine details of the ${partName} as they appear in the original image.`
+
+  // Convert data URL to File object
+  const response = await fetch(imageDataUrl)
+  const blob = await response.blob()
+  const imageFile = new File([blob], `watch_for_${partName}.png`, { type: blob.type })
+
+  try {
+    let result
+    try {
+      result = await openai.images.edit({
+        model: "gpt-image-1.5",
+        image: imageFile,
+        prompt: prompt,
+        input_fidelity: "high"
+      })
+    } catch (modelError) {
+      if (modelError.message?.includes('model') || modelError.code === 'model_not_found') {
+        try {
+          result = await openai.images.edit({
+            model: "gpt-image-1",
+            image: imageFile,
+            prompt: prompt,
+            input_fidelity: "high"
+          })
+        } catch (model1Error) {
+          if (model1Error.message?.includes('model') || model1Error.code === 'model_not_found') {
+            result = await openai.images.edit({
+              image: imageFile,
+              prompt: prompt,
+              input_fidelity: "high"
+            })
+          } else {
+            throw model1Error
+          }
+        }
+      } else {
+        throw modelError
+      }
+    }
+
+    if (result.data && result.data[0] && result.data[0].b64_json) {
+      return `data:image/png;base64,${result.data[0].b64_json}`
+    } else if (result.data && result.data[0] && result.data[0].url) {
+      return result.data[0].url
+    } else {
+      throw new Error('Unexpected response format from images.edit API')
+    }
+  } catch (error) {
+    console.error('Extract part error:', error)
+    throw new Error(error.message || `Failed to extract ${partName} from watch image`)
   }
 }
 

@@ -4,7 +4,7 @@ A React web application that allows you to upload images of watch parts and gene
 
 ## Features
 
-- Upload images of watch parts (bezel, bezel insert, case, dial, strap, hands, chapter ring)
+- Upload images of watch parts (bezel, bezel insert, case, crown, dial, strap, hands, GMT hand, chapter ring)
 - Optional parts - only upload the parts you have
 - Color customization for any uploaded part
 - Generate composite watch images using AI
@@ -96,4 +96,4 @@ The built files will be in the `dist` directory.
 ## Next Steps
 1. Add feature where you extract the part from an image of a full watch. like getting just the bezel insert from a watch.
 
-2. Add custom watch crown support
+2. ~~Add custom watch crown support~~ ✅ Done

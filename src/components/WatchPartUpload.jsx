@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import './WatchPartUpload.css'
 
-function WatchPartUpload({ partId, partLabel, image, onImageChange }) {
+function WatchPartUpload({ partId, partLabel, image, onImageChange, onExtractPart, isExtracting, dimensionFields, dimensions, onDimensionChange }) {
   const fileInputRef = useRef(null)
 
   const handleFileSelect = (e) => {
@@ -25,9 +25,15 @@ function WatchPartUpload({ partId, partLabel, image, onImageChange }) {
         {image ? (
           <div className="image-preview">
             <img src={image.dataUrl} alt={partLabel} />
-            <button className="remove-btn" onClick={handleRemove}>
+            <button className="remove-btn" onClick={handleRemove} disabled={isExtracting}>
               ×
             </button>
+            {isExtracting && (
+              <div className="extract-overlay">
+                <div className="extract-spinner"></div>
+                <span>Extracting {partLabel}...</span>
+              </div>
+            )}
           </div>
         ) : (
           <div className="upload-placeholder">
@@ -46,9 +52,38 @@ function WatchPartUpload({ partId, partLabel, image, onImageChange }) {
           </div>
         )}
       </div>
+      {image && !isExtracting && (
+        <button
+          className="extract-btn"
+          onClick={onExtractPart}
+          title={`Extract the ${partLabel.toLowerCase()} from a full watch image`}
+        >
+          ✂️ Extract from Watch
+        </button>
+      )}
+      {image && dimensionFields && dimensionFields.length > 0 && (
+        <div className="dimension-fields">
+          {dimensionFields.map(field => (
+            <div key={field.key} className="dimension-input-row">
+              <label className="dimension-label">{field.label}</label>
+              <div className="dimension-input-wrapper">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  className="dimension-input"
+                  value={dimensions[field.key] ?? ''}
+                  onChange={(e) => onDimensionChange(field.key, e.target.value)}
+                  placeholder="—"
+                />
+                <span className="dimension-unit">{field.unit}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
 export default WatchPartUpload
-

@@ -4,9 +4,11 @@ const PART_LABELS = {
   bezel: 'Bezel',
   bezelInsert: 'Bezel Insert',
   case: 'Case',
+  crown: 'Crown',
   dial: 'Dial',
   strap: 'Strap',
   hands: 'Hands',
+  gmtHand: 'GMT Hand',
   chapterRing: 'Chapter Ring',
 }
 
@@ -14,7 +16,7 @@ function ColorCustomization({ parts, uploadedParts, colorCustomizations, onColor
   return (
     <div className="color-customization">
       <p className="customization-hint">
-        Customize colors for uploaded parts using natural language. For example: "red", "gold", "blue with silver accents", "matte black", "rose gold", etc. Leave empty to use the original image colors.
+        Customize uploaded parts using natural language. You can specify colors, shapes, finishes, and more. For example: "red", "gold", "blue with silver accents", "matte black", "rounded shape", "brushed finish", etc. Leave empty to use the original image as-is.
       </p>
       <div className="color-grid">
         {parts
@@ -25,8 +27,8 @@ function ColorCustomization({ parts, uploadedParts, colorCustomizations, onColor
               <div className="color-input-wrapper">
                 <textarea
                   value={colorCustomizations[part.id] || ''}
-                  onChange={(e) => onColorChange(part.id, e.target.value.trim() || null)}
-                  placeholder="e.g., red, gold, matte black, blue with silver accents..."
+                  onChange={(e) => onColorChange(part.id, e.target.value || null)}
+                  placeholder="e.g., red, gold, matte black, rounded shape, polished finish..."
                   className="color-text-input"
                   rows="2"
                 />

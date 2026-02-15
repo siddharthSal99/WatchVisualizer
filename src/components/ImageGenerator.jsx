@@ -7,13 +7,15 @@ const PART_LABELS = {
   bezel: 'bezel',
   bezelInsert: 'bezel insert',
   case: 'case',
+  crown: 'crown',
   dial: 'dial',
   strap: 'strap',
   hands: 'hands',
+  gmtHand: 'GMT hand',
   chapterRing: 'chapter ring',
 }
 
-function ImageGenerator({ partImages, colorCustomizations, generatedImage, isGenerating, onGenerate, onGeneratingStart, onGeneratingStop }) {
+function ImageGenerator({ partImages, colorCustomizations, partDimensions, generatedImage, isGenerating, onGenerate, onGeneratingStart, onGeneratingStop }) {
   const [error, setError] = useState(null)
 
   const handleGenerate = async () => {
@@ -28,7 +30,7 @@ function ImageGenerator({ partImages, colorCustomizations, generatedImage, isGen
     onGeneratingStart()
 
     try {
-      const image = await generateWatchImage(partImages, colorCustomizations)
+      const image = await generateWatchImage(partImages, colorCustomizations, partDimensions)
       onGenerate(image)
     } catch (err) {
       setError(err.message || 'Failed to generate image. Please check your API key and try again.')

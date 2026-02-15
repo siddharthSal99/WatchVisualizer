@@ -3,22 +3,43 @@ import './App.css'
 import WatchPartUpload from './components/WatchPartUpload'
 import ColorCustomization from './components/ColorCustomization'
 import ImageGenerator from './components/ImageGenerator'
+import { extractPartFromWatch } from './services/openaiService'
 
 const WATCH_PARTS = [
   { id: 'bezel', label: 'Bezel' },
   { id: 'bezelInsert', label: 'Bezel Insert' },
   { id: 'case', label: 'Case' },
+  { id: 'crown', label: 'Crown' },
   { id: 'dial', label: 'Dial' },
   { id: 'strap', label: 'Strap' },
   { id: 'hands', label: 'Hands' },
+  { id: 'gmtHand', label: 'GMT Hand' },
   { id: 'chapterRing', label: 'Chapter Ring' },
 ]
+
+const PART_DIMENSIONS = {
+  case: [
+    { key: 'outerDiameter', label: 'Outer Diameter', unit: 'mm' },
+    { key: 'lugWidth', label: 'Lug Width', unit: 'mm' },
+  ],
+  strap: [
+    { key: 'strapWidth', label: 'Strap Width', unit: 'mm' },
+  ],
+  dial: [
+    { key: 'diameter', label: 'Diameter', unit: 'mm' },
+  ],
+  hands: [
+    { key: 'length', label: 'Length', unit: 'mm' },
+  ],
+}
 
 function App() {
   const [partImages, setPartImages] = useState({})
   const [colorCustomizations, setColorCustomizations] = useState({})
   const [generatedImage, setGeneratedImage] = useState(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [extractingParts, setExtractingParts] = useState({})
+  const [partDimensions, setPartDimensions] = useState({})
 
   const handleImageUpload = (partId, file) => {
     if (file) {
@@ -38,6 +59,57 @@ function App() {
         const newImages = { ...prev }
         delete newImages[partId]
         return newImages
+      })
+      // Clear dimensions when the image is removed
+      setPartDimensions(prev => {
+        const newDims = { ...prev }
+        delete newDims[partId]
+        return newDims
+      })
+    }
+  }
+
+  const handleDimensionChange = (partId, dimensionKey, value) => {
+    setPartDimensions(prev => {
+      const partDims = { ...(prev[partId] || {}) }
+      if (value === '' || value == null) {
+        delete partDims[dimensionKey]
+      } else {
+        partDims[dimensionKey] = value
+      }
+      // If no dimensions left for this part, remove the entry
+      if (Object.keys(partDims).length === 0) {
+        const newDims = { ...prev }
+        delete newDims[partId]
+        return newDims
+      }
+      return { ...prev, [partId]: partDims }
+    })
+  }
+
+  const handleExtractPart = async (partId) => {
+    const image = partImages[partId]
+    if (!image) return
+
+    setExtractingParts(prev => ({ ...prev, [partId]: true }))
+
+    try {
+      const extractedDataUrl = await extractPartFromWatch(image.dataUrl, partId)
+      // Replace the uploaded image with the extracted part image
+      setPartImages(prev => ({
+        ...prev,
+        [partId]: {
+          file: prev[partId].file,
+          dataUrl: extractedDataUrl
+        }
+      }))
+    } catch (err) {
+      alert(`Failed to extract part: ${err.message}`)
+    } finally {
+      setExtractingParts(prev => {
+        const updated = { ...prev }
+        delete updated[partId]
+        return updated
       })
     }
   }
@@ -75,6 +147,11 @@ function App() {
                 partLabel={part.label}
                 image={partImages[part.id]}
                 onImageChange={(file) => handleImageUpload(part.id, file)}
+                onExtractPart={() => handleExtractPart(part.id)}
+                isExtracting={!!extractingParts[part.id]}
+                dimensionFields={PART_DIMENSIONS[part.id] || []}
+                dimensions={partDimensions[part.id] || {}}
+                onDimensionChange={(dimKey, value) => handleDimensionChange(part.id, dimKey, value)}
               />
             ))}
           </div>
@@ -94,6 +171,7 @@ function App() {
           <ImageGenerator
             partImages={partImages}
             colorCustomizations={colorCustomizations}
+            partDimensions={partDimensions}
             generatedImage={generatedImage}
             isGenerating={isGenerating}
             onGenerate={(image) => {
