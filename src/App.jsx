@@ -15,6 +15,7 @@ const WATCH_PARTS = [
   { id: 'hands', label: 'Hands' },
   { id: 'gmtHand', label: 'GMT Hand' },
   { id: 'chapterRing', label: 'Chapter Ring' },
+  { id: 'movement', label: 'Movement' },
 ]
 
 const PART_DIMENSIONS = {
@@ -40,6 +41,7 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [extractingParts, setExtractingParts] = useState({})
   const [partDimensions, setPartDimensions] = useState({})
+  const [isSkeletonDial, setIsSkeletonDial] = useState(false)
 
   const handleImageUpload = (partId, file) => {
     if (file) {
@@ -152,6 +154,11 @@ function App() {
                 dimensionFields={PART_DIMENSIONS[part.id] || []}
                 dimensions={partDimensions[part.id] || {}}
                 onDimensionChange={(dimKey, value) => handleDimensionChange(part.id, dimKey, value)}
+                {...(part.id === 'dial' ? {
+                  checkboxLabel: 'Skeleton / Open Heart',
+                  checkboxValue: isSkeletonDial,
+                  onCheckboxChange: setIsSkeletonDial,
+                } : {})}
               />
             ))}
           </div>
@@ -172,6 +179,7 @@ function App() {
             partImages={partImages}
             colorCustomizations={colorCustomizations}
             partDimensions={partDimensions}
+            isSkeletonDial={isSkeletonDial}
             generatedImage={generatedImage}
             isGenerating={isGenerating}
             onGenerate={(image) => {

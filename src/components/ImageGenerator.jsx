@@ -13,9 +13,10 @@ const PART_LABELS = {
   hands: 'hands',
   gmtHand: 'GMT hand',
   chapterRing: 'chapter ring',
+  movement: 'movement',
 }
 
-function ImageGenerator({ partImages, colorCustomizations, partDimensions, generatedImage, isGenerating, onGenerate, onGeneratingStart, onGeneratingStop }) {
+function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSkeletonDial, generatedImage, isGenerating, onGenerate, onGeneratingStart, onGeneratingStop }) {
   const [error, setError] = useState(null)
 
   const handleGenerate = async () => {
@@ -30,7 +31,7 @@ function ImageGenerator({ partImages, colorCustomizations, partDimensions, gener
     onGeneratingStart()
 
     try {
-      const image = await generateWatchImage(partImages, colorCustomizations, partDimensions)
+      const image = await generateWatchImage(partImages, colorCustomizations, partDimensions, isSkeletonDial)
       onGenerate(image)
     } catch (err) {
       setError(err.message || 'Failed to generate image. Please check your API key and try again.')

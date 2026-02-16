@@ -10,9 +10,10 @@ const PART_LABELS = {
   hands: 'hands',
   gmtHand: 'GMT hand',
   chapterRing: 'chapter ring',
+  movement: 'movement',
 }
 
-export async function generateWatchImage(partImages, colorCustomizations, partDimensions = {}) {
+export async function generateWatchImage(partImages, colorCustomizations, partDimensions = {}, isSkeletonDial = false) {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY
   
   if (!apiKey) {
@@ -25,7 +26,11 @@ export async function generateWatchImage(partImages, colorCustomizations, partDi
   })
 
   // Build the list of uploaded parts
-  const uploadedParts = Object.keys(partImages)
+  // When skeleton mode is off, exclude the movement image entirely
+  const uploadedParts = Object.keys(partImages).filter(partId => {
+    if (partId === 'movement' && !isSkeletonDial) return false
+    return true
+  })
   const partList = uploadedParts.map(partId => PART_LABELS[partId]).join(', ')
 
   // Build dimension instructions text
@@ -67,7 +72,17 @@ Specific instructions:
 - DIAL: Reproduce all dial features exactly — hour indices/markers (applied, printed, or lumed), minute track, any text or logos, subdials, date windows, patterns, textures (sunburst, fumé, guilloche, etc.), and artwork. Match the layout and positioning faithfully.
 - BEZEL INSERT: Reproduce all bezel insert markings, numerals, minute/hour scales, color gradients (e.g. Pepsi, Batman, Root Beer), the pip/lume dot at 12, and the exact font style of any numbers.
 - CASE, CROWN, CHAPTER RING, STRAP/BRACELET, GMT HAND: Match the exact shape, finish (brushed, polished, matte), proportions, and design details from each reference image.`
-  
+
+  // Add skeleton / open heart dial instructions when enabled
+  if (isSkeletonDial) {
+    prompt += `\n\n- SKELETON / OPEN HEART DIAL: This is a skeleton or open heart dial. The dial has hollow, cut-out, or transparent sections that reveal the watch movement beneath. Identify all areas of the dial that are open, skeletonized, or translucent and render the mechanical movement visible through those openings.`
+    if (uploadedParts.includes('movement')) {
+      prompt += ` A reference image of the movement is provided — faithfully reproduce its bridges, gears, mainspring barrel, balance wheel, and finishing (e.g. Geneva stripes, perlage, blued screws) as seen through the dial openings. The movement should sit naturally behind the dial, with correct depth and layering.`
+    } else {
+      prompt += ` No specific movement image was provided, so render a realistic high-quality automatic mechanical movement visible through the dial openings, with detailed bridges, gears, and finishing.`
+    }
+  }
+
   if (colorInstructions) {
     prompt += `\n\nColor/style overrides: ${colorInstructions}`
   }

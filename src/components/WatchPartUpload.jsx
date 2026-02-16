@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from 'react'
 import './WatchPartUpload.css'
 
-function WatchPartUpload({ partId, partLabel, image, onImageChange, onExtractPart, isExtracting, dimensionFields, dimensions, onDimensionChange }) {
+function WatchPartUpload({ partId, partLabel, image, onImageChange, onExtractPart, isExtracting, dimensionFields, dimensions, onDimensionChange, checkboxLabel, checkboxValue, onCheckboxChange }) {
   const fileInputRef = useRef(null)
   const [isDragOver, setIsDragOver] = useState(false)
 
@@ -146,6 +146,20 @@ function WatchPartUpload({ partId, partLabel, image, onImageChange, onExtractPar
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {image && checkboxLabel && (
+        <div className="skeleton-checkbox-row">
+          <label className="skeleton-checkbox-label">
+            <input
+              type="checkbox"
+              checked={checkboxValue}
+              onChange={(e) => onCheckboxChange(e.target.checked)}
+              className="skeleton-checkbox-input"
+            />
+            <span className="skeleton-checkbox-toggle"></span>
+            <span className="skeleton-checkbox-text">{checkboxLabel}</span>
+          </label>
         </div>
       )}
     </div>
