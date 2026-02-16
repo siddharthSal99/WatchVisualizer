@@ -1,8 +1,9 @@
-import { useRef } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import './WatchPartUpload.css'
 
 function WatchPartUpload({ partId, partLabel, image, onImageChange, onExtractPart, isExtracting, dimensionFields, dimensions, onDimensionChange }) {
   const fileInputRef = useRef(null)
+  const [isDragOver, setIsDragOver] = useState(false)
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0]
@@ -18,10 +19,75 @@ function WatchPartUpload({ partId, partLabel, image, onImageChange, onExtractPar
     onImageChange(null)
   }
 
+  const processImageFile = useCallback((file) => {
+    if (file && file.type.startsWith('image/')) {
+      onImageChange(file)
+      return true
+    }
+    return false
+  }, [onImageChange])
+
+  const handlePaste = useCallback((e) => {
+    const items = e.clipboardData?.items
+    if (!items) return
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault()
+        const file = item.getAsFile()
+        if (file) {
+          processImageFile(file)
+        }
+        return
+      }
+    }
+  }, [processImageFile])
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+  }, [])
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+
+    const file = e.dataTransfer?.files?.[0]
+    if (file) {
+      processImageFile(file)
+    }
+  }, [processImageFile])
+
   return (
     <div className="watch-part-upload">
       <label className="part-label">{partLabel}</label>
-      <div className="upload-area">
+      <div
+        className={`upload-area${isDragOver ? ' drag-over' : ''}`}
+        onPaste={handlePaste}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        contentEditable
+        suppressContentEditableWarning
+        onBeforeInput={(e) => e.preventDefault()}
+        onKeyDown={(e) => {
+          // Allow paste shortcuts and tab navigation, block everything else
+          const isPaste = (e.ctrlKey || e.metaKey) && e.key === 'v'
+          const isTab = e.key === 'Tab'
+          if (!isPaste && !isTab) {
+            e.preventDefault()
+          }
+        }}
+        tabIndex={0}
+      >
         {image ? (
           <div className="image-preview">
             <img src={image.dataUrl} alt={partLabel} />
@@ -47,7 +113,7 @@ function WatchPartUpload({ partId, partLabel, image, onImageChange, onExtractPar
             />
             <label htmlFor={`upload-${partId}`} className="upload-label">
               <span className="upload-icon">📷</span>
-              <span>Click to upload</span>
+              <span>Click, paste, or drop image</span>
             </label>
           </div>
         )}
