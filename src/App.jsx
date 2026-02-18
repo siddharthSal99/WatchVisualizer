@@ -3,6 +3,7 @@ import './App.css'
 import WatchPartUpload from './components/WatchPartUpload'
 import ColorCustomization from './components/ColorCustomization'
 import ImageGenerator from './components/ImageGenerator'
+import HamburgerMenu from './components/HamburgerMenu'
 import { extractPartFromWatch } from './services/openaiService'
 
 const WATCH_PARTS = [
@@ -30,7 +31,9 @@ const PART_DIMENSIONS = {
     { key: 'diameter', label: 'Diameter', unit: 'mm' },
   ],
   hands: [
-    { key: 'length', label: 'Length', unit: 'mm' },
+    { key: 'hourHandLength', label: 'Hour Hand Length', unit: 'mm' },
+    { key: 'minuteHandLength', label: 'Minute Hand Length', unit: 'mm' },
+    { key: 'secondHandLength', label: 'Second Hand Length', unit: 'mm' },
   ],
 }
 
@@ -42,6 +45,16 @@ function App() {
   const [extractingParts, setExtractingParts] = useState({})
   const [partDimensions, setPartDimensions] = useState({})
   const [isSkeletonDial, setIsSkeletonDial] = useState(false)
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('openai_api_key') || '')
+
+  const handleApiKeyChange = (key) => {
+    setApiKey(key)
+    if (key) {
+      localStorage.setItem('openai_api_key', key)
+    } else {
+      localStorage.removeItem('openai_api_key')
+    }
+  }
 
   const handleImageUpload = (partId, file) => {
     if (file) {
@@ -134,8 +147,16 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Watch Visualizer</h1>
-        <p>Upload watch parts and generate a composite image</p>
+        <div className="header-top">
+          <div className="header-spacer"></div>
+          <div className="header-title-group">
+            <h1>Watch Visualizer</h1>
+            <p>Upload watch parts and generate a composite image</p>
+          </div>
+          <div className="header-menu">
+            <HamburgerMenu apiKey={apiKey} onApiKeyChange={handleApiKeyChange} />
+          </div>
+        </div>
       </header>
 
       <div className="app-content">

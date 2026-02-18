@@ -1,5 +1,12 @@
 import OpenAI from 'openai'
 
+// Resolve the API key: runtime key from localStorage takes priority, then .env
+function getApiKey() {
+  const runtimeKey = localStorage.getItem('openai_api_key')
+  if (runtimeKey) return runtimeKey
+  return import.meta.env.VITE_OPENAI_API_KEY || ''
+}
+
 const PART_LABELS = {
   bezel: 'bezel',
   bezelInsert: 'bezel insert',
@@ -14,10 +21,10 @@ const PART_LABELS = {
 }
 
 export async function generateWatchImage(partImages, colorCustomizations, partDimensions = {}, isSkeletonDial = false) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+  const apiKey = getApiKey()
   
   if (!apiKey) {
-    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.')
+    throw new Error('OpenAI API key is not configured. Please enter your API key via the menu (☰) or set VITE_OPENAI_API_KEY in your .env file.')
   }
 
   const openai = new OpenAI({
@@ -39,7 +46,9 @@ export async function generateWatchImage(partImages, colorCustomizations, partDi
     lugWidth: 'lug width',
     strapWidth: 'strap width',
     diameter: 'diameter',
-    length: 'length',
+    hourHandLength: 'hour hand length',
+    minuteHandLength: 'minute hand length',
+    secondHandLength: 'second hand length',
   }
 
   const dimensionInstructions = Object.entries(partDimensions)
@@ -267,10 +276,10 @@ Be as specific as possible so the description alone could recreate the watch fai
 
 // Function to extract/isolate a specific watch part from a full watch image
 export async function extractPartFromWatch(imageDataUrl, partId) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+  const apiKey = getApiKey()
   
   if (!apiKey) {
-    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.')
+    throw new Error('OpenAI API key is not configured. Please enter your API key via the menu (☰) or set VITE_OPENAI_API_KEY in your .env file.')
   }
 
   const openai = new OpenAI({
@@ -336,10 +345,10 @@ export async function extractPartFromWatch(imageDataUrl, partId) {
 
 // Function to refine an existing generated image based on text feedback
 export async function refineWatchImage(generatedImageUrl, refinementText) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY
+  const apiKey = getApiKey()
   
   if (!apiKey) {
-    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.')
+    throw new Error('OpenAI API key is not configured. Please enter your API key via the menu (☰) or set VITE_OPENAI_API_KEY in your .env file.')
   }
 
   const openai = new OpenAI({
