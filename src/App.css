@@ -48,13 +48,15 @@
 
 .upload-section,
 .customization-section,
-.generator-section {
+.generator-section,
+.gallery-section {
   margin-bottom: 40px;
 }
 
 .upload-section h2,
 .customization-section h2,
-.generator-section h2 {
+.generator-section h2,
+.gallery-section h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
   color: #333;
@@ -68,3 +70,70 @@
   gap: 20px;
 }
 
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 20px;
+  }
+
+  .header-title-group h1 {
+    font-size: 1.6rem;
+    margin-bottom: 6px;
+  }
+
+  .header-title-group p {
+    font-size: 0.9rem;
+  }
+
+  .header-spacer {
+    width: 0;
+    display: none;
+  }
+
+  .app-content {
+    padding: 20px 16px;
+  }
+
+  .upload-section h2,
+  .customization-section h2,
+  .generator-section h2,
+  .gallery-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 14px;
+  }
+
+  .parts-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .upload-section,
+  .customization-section,
+  .generator-section,
+  .gallery-section {
+    margin-bottom: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app {
+    border-radius: 0;
+  }
+
+  .app-header {
+    padding: 16px;
+  }
+
+  .header-title-group h1 {
+    font-size: 1.3rem;
+  }
+
+  .app-content {
+    padding: 16px 12px;
+  }
+
+  .parts-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}

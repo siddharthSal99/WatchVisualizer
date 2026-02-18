@@ -1,0 +1,270 @@
+.gallery {
+  margin-top: 10px;
+}
+
+.gallery-loading {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+}
+
+.gallery-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+  background: #f9f9fb;
+  border-radius: 12px;
+  border: 2px dashed #e0e0e0;
+}
+
+.gallery-empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.gallery-empty p {
+  margin: 4px 0;
+}
+
+.gallery-empty-hint {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.gallery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.gallery-count {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.gallery-clear-btn {
+  background: none;
+  border: 1px solid #e74c3c;
+  color: #e74c3c;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.gallery-clear-btn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.gallery-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gallery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.gallery-card-image {
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.gallery-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-card-info {
+  padding: 10px 12px;
+}
+
+.gallery-card-date {
+  display: block;
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.gallery-card-parts {
+  display: block;
+  font-size: 0.8rem;
+  color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gallery-card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.gallery-card:hover .gallery-card-actions {
+  opacity: 1;
+}
+
+.gallery-card-download,
+.gallery-card-delete {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.gallery-card-download {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+}
+
+.gallery-card-download:hover {
+  background: #667eea;
+  color: white;
+}
+
+.gallery-card-delete {
+  background: rgba(255, 255, 255, 0.9);
+  color: #e74c3c;
+  font-size: 1.2rem;
+}
+
+.gallery-card-delete:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+/* Lightbox */
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.gallery-lightbox-content {
+  position: relative;
+  max-width: 800px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-lightbox-content img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+}
+
+.gallery-lightbox-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: background 0.2s;
+}
+
+.gallery-lightbox-close:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.gallery-lightbox-info {
+  padding: 16px 20px;
+}
+
+.gallery-lightbox-date {
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.gallery-lightbox-parts,
+.gallery-lightbox-colors {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.gallery-lightbox-download {
+  margin-top: 12px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: opacity 0.2s;
+}
+
+.gallery-lightbox-download:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .gallery-lightbox-content {
+    max-width: 95vw;
+  }
+
+  .gallery-card-actions {
+    opacity: 1;
+  }
+}
+

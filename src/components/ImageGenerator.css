@@ -9,6 +9,14 @@
   gap: 12px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.generate-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .generate-btn,
@@ -48,6 +56,20 @@
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
 }
 
+/* Cost Estimation Badge */
+.cost-estimate {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: #f0f0f5;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: #666;
+  white-space: nowrap;
+  cursor: help;
+}
+
 .error-message {
   background: #f8d7da;
   color: #721c24;
@@ -77,6 +99,33 @@
   100% { transform: rotate(360deg); }
 }
 
+.loading-step-message {
+  font-size: 1.05rem;
+  color: #555;
+  margin-bottom: 16px;
+  min-height: 1.5em;
+  transition: opacity 0.3s;
+}
+
+.loading-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.loading-dot.active {
+  background: #667eea;
+  transform: scale(1.2);
+}
+
 .generated-image-container {
   text-align: center;
 }
@@ -99,4 +148,3 @@
   padding: 20px;
   font-style: italic;
 }
-

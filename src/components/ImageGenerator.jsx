@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './ImageGenerator.css'
 import { generateWatchImage } from '../services/openaiService'
 import ImageRefinement from './ImageRefinement'
@@ -16,8 +16,57 @@ const PART_LABELS = {
   movement: 'movement',
 }
 
+// Cost estimation based on OpenAI pricing (approximate)
+// Primary: gpt-image-1.5 images.edit ~ $0.02-$0.05 base + input tokens
+// Fallback: GPT-4o vision ($0.005) + DALL-E 3 ($0.04) ~ $0.045
+function estimateCost(numParts) {
+  // Base cost for generation (gpt-image-1.5 output)
+  const baseCost = 0.02
+  // Additional cost per input image (token-based, ~$0.003-0.008 per image)
+  const perImageCost = 0.005
+  const low = baseCost + numParts * perImageCost * 0.6
+  const high = baseCost + numParts * perImageCost * 1.8
+  return {
+    low: Math.max(0.01, low).toFixed(2),
+    high: Math.max(0.03, high).toFixed(2),
+  }
+}
+
+// Loading step messages that rotate during generation
+const LOADING_STEPS = [
+  { message: 'Uploading part images...', duration: 3000 },
+  { message: 'Analyzing watch parts...', duration: 5000 },
+  { message: 'Compositing watch design...', duration: 8000 },
+  { message: 'Generating photorealistic image...', duration: 15000 },
+  { message: 'Applying finishing touches...', duration: 10000 },
+  { message: 'Almost there...', duration: 60000 },
+]
+
 function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSkeletonDial, generatedImage, isGenerating, onGenerate, onGeneratingStart, onGeneratingStop }) {
   const [error, setError] = useState(null)
+  const [loadingStep, setLoadingStep] = useState(0)
+
+  // Cycle through loading steps while generating
+  useEffect(() => {
+    if (!isGenerating) {
+      setLoadingStep(0)
+      return
+    }
+
+    let stepIndex = 0
+    setLoadingStep(0)
+
+    const advance = () => {
+      stepIndex++
+      if (stepIndex < LOADING_STEPS.length) {
+        setLoadingStep(stepIndex)
+        timer = setTimeout(advance, LOADING_STEPS[stepIndex].duration)
+      }
+    }
+
+    let timer = setTimeout(advance, LOADING_STEPS[0].duration)
+    return () => clearTimeout(timer)
+  }, [isGenerating])
 
   const handleGenerate = async () => {
     const uploadedParts = Object.keys(partImages)
@@ -65,17 +114,25 @@ function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSke
 
   const uploadedParts = Object.keys(partImages)
   const hasParts = uploadedParts.length > 0
+  const cost = hasParts ? estimateCost(uploadedParts.length) : null
 
   return (
     <div className="image-generator">
       <div className="generator-controls">
-        <button
-          className="generate-btn"
-          onClick={handleGenerate}
-          disabled={!hasParts || isGenerating}
-        >
-          {isGenerating ? 'Generating...' : 'Generate Watch Image'}
-        </button>
+        <div className="generate-btn-group">
+          <button
+            className="generate-btn"
+            onClick={handleGenerate}
+            disabled={!hasParts || isGenerating}
+          >
+            {isGenerating ? 'Generating...' : 'Generate Watch Image'}
+          </button>
+          {cost && !isGenerating && (
+            <span className="cost-estimate" title="Approximate OpenAI API cost per generation">
+              Est. ~${cost.low} – ${cost.high}
+            </span>
+          )}
+        </div>
         {generatedImage && (
           <button className="download-btn" onClick={handleDownload}>
             Download Image
@@ -92,7 +149,17 @@ function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSke
       {isGenerating && (
         <div className="loading-state">
           <div className="spinner"></div>
-          <p>Generating your watch visualization...</p>
+          <p className="loading-step-message">
+            {LOADING_STEPS[loadingStep]?.message || 'Generating your watch visualization...'}
+          </p>
+          <div className="loading-progress">
+            {LOADING_STEPS.map((_, i) => (
+              <span
+                key={i}
+                className={`loading-dot${i <= loadingStep ? ' active' : ''}`}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -119,4 +186,3 @@ function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSke
 }
 
 export default ImageGenerator
-

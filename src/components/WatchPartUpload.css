@@ -292,3 +292,42 @@
   font-weight: 500;
 }
 
+/* Responsive */
+@media (max-width: 768px) {
+  .upload-placeholder {
+    min-height: 120px;
+  }
+
+  .upload-label {
+    min-height: 120px;
+    padding: 14px;
+    font-size: 0.85rem;
+  }
+
+  .upload-icon {
+    font-size: 1.5rem;
+  }
+
+  .image-preview img {
+    max-height: 160px;
+  }
+
+  .extract-btn {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+
+  .dimension-label {
+    font-size: 0.75rem;
+  }
+
+  .dimension-input {
+    width: 52px;
+    font-size: 0.75rem;
+  }
+
+  .skeleton-checkbox-text {
+    font-size: 0.8rem;
+  }
+}
+

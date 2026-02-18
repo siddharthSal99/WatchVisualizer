@@ -78,3 +78,19 @@
   font-style: italic;
 }
 
+/* Responsive */
+@media (max-width: 768px) {
+  .color-customization {
+    padding: 14px;
+  }
+
+  .color-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .customization-hint {
+    font-size: 0.85rem;
+  }
+}
+

@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import './App.css'
 import WatchPartUpload from './components/WatchPartUpload'
 import ColorCustomization from './components/ColorCustomization'
 import ImageGenerator from './components/ImageGenerator'
 import HamburgerMenu from './components/HamburgerMenu'
+import Gallery from './components/Gallery'
 import { extractPartFromWatch } from './services/openaiService'
+import { saveGeneration } from './services/galleryDB'
 
 const WATCH_PARTS = [
   { id: 'bezel', label: 'Bezel' },
@@ -46,6 +48,7 @@ function App() {
   const [partDimensions, setPartDimensions] = useState({})
   const [isSkeletonDial, setIsSkeletonDial] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('openai_api_key') || '')
+  const [galleryRefresh, setGalleryRefresh] = useState(0)
 
   const handleApiKeyChange = (key) => {
     setApiKey(key)
@@ -144,6 +147,24 @@ function App() {
     }
   }
 
+  // Save generated image to gallery and refresh it
+  const handleGenerate = useCallback(async (image) => {
+    setGeneratedImage(image)
+    setIsGenerating(false)
+
+    // Auto-save to gallery
+    try {
+      await saveGeneration({
+        imageDataUrl: image,
+        partsUsed: Object.keys(partImages),
+        colorCustomizations,
+      })
+      setGalleryRefresh(prev => prev + 1)
+    } catch (err) {
+      console.error('Failed to save to gallery:', err)
+    }
+  }, [partImages, colorCustomizations])
+
   return (
     <div className="app">
       <header className="app-header">
@@ -203,13 +224,15 @@ function App() {
             isSkeletonDial={isSkeletonDial}
             generatedImage={generatedImage}
             isGenerating={isGenerating}
-            onGenerate={(image) => {
-              setGeneratedImage(image)
-              setIsGenerating(false)
-            }}
+            onGenerate={handleGenerate}
             onGeneratingStart={() => setIsGenerating(true)}
             onGeneratingStop={() => setIsGenerating(false)}
           />
+        </div>
+
+        <div className="gallery-section">
+          <h2>Generation History</h2>
+          <Gallery refreshTrigger={galleryRefresh} />
         </div>
       </div>
     </div>
@@ -217,4 +240,3 @@ function App() {
 }
 
 export default App
-

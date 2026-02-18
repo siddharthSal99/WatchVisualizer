@@ -28,6 +28,9 @@ dist-ssr
 .env.local
 .env.production
 
+# Vercel
+.vercel
+
 # Images
 *.png
 *.jpeg

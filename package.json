@@ -1,18 +1,19 @@
 {
   "name": "watch-visualizer",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:full": "vercel dev",
     "dev:tunnel": "node scripts/ngrok-tunnel.js",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "openai": "^4.20.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "openai": "^4.20.0"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
@@ -20,7 +21,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "dotenv": "^16.3.1",
     "ngrok": "^4.3.3",
+    "vercel": "^50.18.2",
     "vite": "^5.0.8"
   }
 }
-

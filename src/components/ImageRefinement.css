@@ -111,3 +111,24 @@
   font-size: 0.9rem;
 }
 
+/* Responsive */
+@media (max-width: 768px) {
+  .image-refinement {
+    padding: 14px;
+    margin-top: 20px;
+  }
+
+  .image-refinement h3 {
+    font-size: 1.1rem;
+  }
+
+  .refinement-hint {
+    font-size: 0.85rem;
+  }
+
+  .refine-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
