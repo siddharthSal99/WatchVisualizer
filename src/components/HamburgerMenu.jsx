@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import './HamburgerMenu.css'
 
 function HamburgerMenu({ apiKey, onApiKeyChange }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const [showApiKey, setShowApiKey] = useState(false)
   const [localApiKey, setLocalApiKey] = useState(apiKey || '')
   const [keySaved, setKeySaved] = useState(false)
