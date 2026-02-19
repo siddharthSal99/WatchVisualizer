@@ -42,7 +42,7 @@ const LOADING_STEPS = [
   { message: 'Almost there...', duration: 60000 },
 ]
 
-function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSkeletonDial, generatedImage, isGenerating, onGenerate, onGeneratingStart, onGeneratingStop }) {
+function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSkeletonDial, generatedImage, isGenerating, onGenerate, onGeneratingStart, onGeneratingStop, requireApiKey }) {
   const [error, setError] = useState(null)
   const [loadingStep, setLoadingStep] = useState(0)
 
@@ -68,14 +68,7 @@ function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSke
     return () => clearTimeout(timer)
   }, [isGenerating])
 
-  const handleGenerate = async () => {
-    const uploadedParts = Object.keys(partImages)
-    
-    if (uploadedParts.length === 0) {
-      setError('Please upload at least one watch part image.')
-      return
-    }
-
+  const doGenerate = async () => {
     setError(null)
     onGeneratingStart()
 
@@ -87,6 +80,21 @@ function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSke
       if (onGeneratingStop) {
         onGeneratingStop()
       }
+    }
+  }
+
+  const handleGenerate = () => {
+    const uploadedParts = Object.keys(partImages)
+    
+    if (uploadedParts.length === 0) {
+      setError('Please upload at least one watch part image.')
+      return
+    }
+
+    if (requireApiKey) {
+      requireApiKey(doGenerate)
+    } else {
+      doGenerate()
     }
   }
 
@@ -174,6 +182,7 @@ function ImageGenerator({ partImages, colorCustomizations, partDimensions, isSke
             onRefined={(refinedImage) => {
               onGenerate(refinedImage)
             }}
+            requireApiKey={requireApiKey}
           />
         </>
       )}

@@ -1,11 +1,12 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import './App.css'
 import WatchPartUpload from './components/WatchPartUpload'
 import ColorCustomization from './components/ColorCustomization'
 import ImageGenerator from './components/ImageGenerator'
 import HamburgerMenu from './components/HamburgerMenu'
 import Gallery from './components/Gallery'
-import { extractPartFromWatch } from './services/openaiService'
+import ApiKeyPrompt from './components/ApiKeyPrompt'
+import { extractPartFromWatch, hasApiKey } from './services/openaiService'
 import { saveGeneration } from './services/galleryDB'
 
 const WATCH_PARTS = [
@@ -49,6 +50,8 @@ function App() {
   const [isSkeletonDial, setIsSkeletonDial] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('openai_api_key') || '')
   const [galleryRefresh, setGalleryRefresh] = useState(0)
+  const [showApiKeyPrompt, setShowApiKeyPrompt] = useState(false)
+  const pendingActionRef = useRef(null)
 
   const handleApiKeyChange = (key) => {
     setApiKey(key)
@@ -57,6 +60,29 @@ function App() {
     } else {
       localStorage.removeItem('openai_api_key')
     }
+  }
+
+  // Gate an AI operation: if no key, show prompt; otherwise run immediately.
+  const requireApiKey = useCallback((action) => {
+    if (hasApiKey()) {
+      action()
+    } else {
+      pendingActionRef.current = action
+      setShowApiKeyPrompt(true)
+    }
+  }, [])
+
+  const handleApiKeyPromptSave = (key) => {
+    handleApiKeyChange(key)
+    setShowApiKeyPrompt(false)
+    const action = pendingActionRef.current
+    pendingActionRef.current = null
+    if (action) action()
+  }
+
+  const handleApiKeyPromptClose = () => {
+    setShowApiKeyPrompt(false)
+    pendingActionRef.current = null
   }
 
   const handleImageUpload = (partId, file) => {
@@ -105,7 +131,7 @@ function App() {
     })
   }
 
-  const handleExtractPart = async (partId) => {
+  const doExtractPart = async (partId) => {
     const image = partImages[partId]
     if (!image) return
 
@@ -113,7 +139,6 @@ function App() {
 
     try {
       const extractedDataUrl = await extractPartFromWatch(image.dataUrl, partId)
-      // Replace the uploaded image with the extracted part image
       setPartImages(prev => ({
         ...prev,
         [partId]: {
@@ -130,6 +155,10 @@ function App() {
         return updated
       })
     }
+  }
+
+  const handleExtractPart = (partId) => {
+    requireApiKey(() => doExtractPart(partId))
   }
 
   const handleColorChange = (partId, color) => {
@@ -227,6 +256,7 @@ function App() {
             onGenerate={handleGenerate}
             onGeneratingStart={() => setIsGenerating(true)}
             onGeneratingStop={() => setIsGenerating(false)}
+            requireApiKey={requireApiKey}
           />
         </div>
 
@@ -235,6 +265,12 @@ function App() {
           <Gallery refreshTrigger={galleryRefresh} />
         </div>
       </div>
+
+      <ApiKeyPrompt
+        isOpen={showApiKeyPrompt}
+        onClose={handleApiKeyPromptClose}
+        onSaveKey={handleApiKeyPromptSave}
+      />
     </div>
   )
 }

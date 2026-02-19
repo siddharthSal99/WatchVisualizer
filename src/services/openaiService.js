@@ -5,6 +5,11 @@ function getApiKey() {
   return import.meta.env.VITE_OPENAI_API_KEY || ''
 }
 
+// Check whether the user has an API key configured
+export function hasApiKey() {
+  return !!getApiKey()
+}
+
 // Resize an image data URL to a max dimension to keep payloads small
 function resizeImage(dataUrl, maxDimension = 1024) {
   return new Promise((resolve) => {

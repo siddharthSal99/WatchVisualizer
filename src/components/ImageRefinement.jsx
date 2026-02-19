@@ -2,17 +2,12 @@ import { useState } from 'react'
 import './ImageRefinement.css'
 import { refineWatchImage } from '../services/openaiService'
 
-function ImageRefinement({ generatedImage, onRefined }) {
+function ImageRefinement({ generatedImage, onRefined, requireApiKey }) {
   const [refinementText, setRefinementText] = useState('')
   const [isRefining, setIsRefining] = useState(false)
   const [error, setError] = useState(null)
 
-  const handleRefine = async () => {
-    if (!refinementText.trim()) {
-      setError('Please enter feedback about what to change.')
-      return
-    }
-
+  const doRefine = async () => {
     setError(null)
     setIsRefining(true)
 
@@ -24,6 +19,19 @@ function ImageRefinement({ generatedImage, onRefined }) {
       setError(err.message || 'Failed to refine image. Please try again.')
     } finally {
       setIsRefining(false)
+    }
+  }
+
+  const handleRefine = () => {
+    if (!refinementText.trim()) {
+      setError('Please enter feedback about what to change.')
+      return
+    }
+
+    if (requireApiKey) {
+      requireApiKey(doRefine)
+    } else {
+      doRefine()
     }
   }
 
