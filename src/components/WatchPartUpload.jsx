@@ -119,16 +119,32 @@ function WatchPartUpload({ partId, partLabel, image, onImageChange, onExtractPar
         )}
       </div>
       {image && !isExtracting && (
-        <button
-          className="extract-btn"
-          onClick={onExtractPart}
-          title={`Extract the ${partLabel.toLowerCase()} from a full watch image`}
-        >
-          ✂️ Extract from Watch
-        </button>
+        <div className="extract-btn-row">
+          <button
+            className="extract-btn"
+            onClick={onExtractPart}
+          >
+            ✂️ Extract from Watch
+          </button>
+          <span className="tooltip-wrapper">
+            <span className="tooltip-icon">?</span>
+            <span className="tooltip-text">
+              Uses AI to isolate the {partLabel.toLowerCase()} from a full watch photo, removing the background and other parts.
+            </span>
+          </span>
+        </div>
       )}
       {image && dimensionFields && dimensionFields.length > 0 && (
         <div className="dimension-fields">
+          <div className="dimension-fields-header">
+            <span className="dimension-fields-title">Measurements</span>
+            <span className="tooltip-wrapper">
+              <span className="tooltip-icon">?</span>
+              <span className="tooltip-text">
+                Optional measurements help the AI generate a more accurately proportioned watch. Leave blank if unsure.
+              </span>
+            </span>
+          </div>
           {dimensionFields.map(field => (
             <div key={field.key} className="dimension-input-row">
               <label className="dimension-label">{field.label}</label>
