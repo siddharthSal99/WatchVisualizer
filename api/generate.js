@@ -59,11 +59,24 @@ function buildPrompt(uploadedParts, colorCustomizations, partDimensions, isSkele
 
   let prompt = `Here are images of individual watch parts: ${partList}. Generate a photorealistic image of the fully assembled wristwatch using exactly these parts. It is critical that you faithfully reproduce the exact shape, silhouette, proportions, colors, and fine details of every single part as shown in the reference images. Do not substitute generic or default shapes for any part.
 
+WATCH ANATOMY — how the parts are layered and positioned (from bottom to top):
+1. STRAP/BRACELET: Attaches to the lugs of the case and extends above and below it on the wrist.
+2. CASE: The main housing of the watch. It has a circular (or shaped) opening in the center where the dial sits recessed inside.
+3. MOVEMENT: Sits underneath the dial, hidden inside the case. It is only visible if the dial is a skeleton/open-heart type with transparent or cut-out sections.
+4. DIAL: Sits inside the case, recessed within the case opening. It is the face of the watch displaying indices, markers, and text.
+5. CHAPTER RING: A thin ring that circumscribes (surrounds) the dial. It sits inside the case, between the outer edge of the dial and the inner wall of the case opening. It often has minute markings or indices printed on it.
+6. HANDS: Mounted on top of the dial, at the center, pointing outward to indicate time. They overlap the dial and chapter ring.
+7. CROWN: A small knob on the side of the case (typically at 3 o'clock) used to set the time.
+8. BEZEL: A ring that sits on top of the case, surrounding the case opening. It frames the dial/chapter ring from above. Only its outer edge may be visible if a bezel insert is present.
+9. BEZEL INSERT: Sits on top of the bezel. When present, the bezel insert is the outermost visible ring around the dial — you see the full bezel insert and only the outer rim/edge of the bezel beneath it.
+
 Specific instructions:
 - HANDS: Reproduce the exact hand style and silhouette from the image (e.g. cathedral, dauphine, snowflake, sword, pencil, skeleton, etc.). Match the hand width, length ratio, lume plots, and tip shape precisely. Do not use generic stick hands unless that is what is shown.
 - DIAL: Reproduce all dial features exactly — hour indices/markers (applied, printed, or lumed), minute track, any text or logos, subdials, date windows, patterns, textures (sunburst, fumé, guilloche, etc.), and artwork. Match the layout and positioning faithfully.
-- BEZEL INSERT: Reproduce all bezel insert markings, numerals, minute/hour scales, color gradients (e.g. Pepsi, Batman, Root Beer), the pip/lume dot at 12, and the exact font style of any numbers.
-- CASE, CROWN, CHAPTER RING, STRAP/BRACELET, GMT HAND: Match the exact shape, finish (brushed, polished, matte), proportions, and design details from each reference image.`;
+- BEZEL INSERT: Reproduce all bezel insert markings, numerals, minute/hour scales, color gradients (e.g. Pepsi, Batman, Root Beer), the pip/lume dot at 12, and the exact font style of any numbers. Remember: the bezel insert sits on top of the bezel, so it is the dominant visible ring framing the dial.
+- CHAPTER RING: This ring fills the gap between the dial edge and the case wall. Reproduce its markings, tick marks, and finish exactly. It should appear at the same depth as the dial, inside the case.
+- CASE: Match the exact shape, finish (brushed, polished, matte), lug style, and proportions. The dial, chapter ring, and movement sit inside the case; the bezel sits on top of it.
+- CROWN, STRAP/BRACELET, GMT HAND: Match the exact shape, finish, proportions, and design details from each reference image.`;
 
   if (isSkeletonDial) {
     prompt += `\n\n- SKELETON / OPEN HEART DIAL: This is a skeleton or open heart dial. The dial has hollow, cut-out, or transparent sections that reveal the watch movement beneath. Identify all areas of the dial that are open, skeletonized, or translucent and render the mechanical movement visible through those openings.`;
