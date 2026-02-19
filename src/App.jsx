@@ -6,7 +6,11 @@ import ImageGenerator from './components/ImageGenerator'
 import HamburgerMenu from './components/HamburgerMenu'
 import Gallery from './components/Gallery'
 import ApiKeyPrompt from './components/ApiKeyPrompt'
+import ErrorDialog from './components/ErrorDialog'
 import { extractPartFromWatch, hasApiKey } from './services/openaiService'
+
+const MAX_IMAGE_SIZE_MB = 20
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024
 import { saveGeneration } from './services/galleryDB'
 
 const WATCH_PARTS = [
@@ -51,6 +55,7 @@ function App() {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('openai_api_key') || '')
   const [galleryRefresh, setGalleryRefresh] = useState(0)
   const [showApiKeyPrompt, setShowApiKeyPrompt] = useState(false)
+  const [errorDialog, setErrorDialog] = useState({ open: false, title: '', message: '' })
   const pendingActionRef = useRef(null)
 
   const handleApiKeyChange = (key) => {
@@ -87,6 +92,15 @@ function App() {
 
   const handleImageUpload = (partId, file) => {
     if (file) {
+      if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(1)
+        setErrorDialog({
+          open: true,
+          title: 'Image Too Large',
+          message: `The selected image is ${sizeMB} MB, which exceeds the maximum allowed size of ${MAX_IMAGE_SIZE_MB} MB. Please choose a smaller image or reduce its size before uploading.`,
+        })
+        return
+      }
       const reader = new FileReader()
       reader.onload = (e) => {
         setPartImages(prev => ({
@@ -270,6 +284,13 @@ function App() {
         isOpen={showApiKeyPrompt}
         onClose={handleApiKeyPromptClose}
         onSaveKey={handleApiKeyPromptSave}
+      />
+
+      <ErrorDialog
+        isOpen={errorDialog.open}
+        title={errorDialog.title}
+        message={errorDialog.message}
+        onClose={() => setErrorDialog({ open: false, title: '', message: '' })}
       />
     </div>
   )
